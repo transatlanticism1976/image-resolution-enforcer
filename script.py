@@ -13,17 +13,16 @@ MIN_WIDTH = 5100 # pixels
 def process_submissions(reddit):
     for submission in reddit.subreddit('EngineeringResumes').stream.submissions():
         if submission.link_flair_text in ('Question','Meta','Success Story!'):
-            return
+            continue # skip submission 
         if submission.is_self:
             width = get_width(submission) # unit: pixels
             resolution = round(width/8.5) # convert pixels to "DPI"
             if width < MIN_WIDTH:
                 print(f"REJECT {resolution}DPI {submission.author}")
                 # submission.report(f"low-res image detected: {resolution}DPI")
-                return
             else:
                 print(f"PASS {resolution}DPI {submission.author}")
-                return
+            return
 
 def get_width(submission):
     s = submission.selftext
