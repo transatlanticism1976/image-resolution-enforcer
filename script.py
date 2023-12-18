@@ -2,11 +2,11 @@
 
 import praw
 
-USERNAME = "EngResBot"
+USERNAME = ""
 PASSWORD = ""
-CLIENT_ID = "Hao8ehOuXuRfjQz-kvsGxg"
-CLIENT_SECRET = "-Qt2qm0skYvIZX4GCdSMxaFxhsMC0A"
-USER_AGENT = "script:ImageResolutionEnforcer:v0.0.1 (by /u/EngResBot)"
+CLIENT_ID = ""
+CLIENT_SECRET = ""
+USER_AGENT = "script:ImageResolutionEnforcer:v0.0.1 (by /u/)"
 
 MIN_WIDTH = 5100 # pixels
 
