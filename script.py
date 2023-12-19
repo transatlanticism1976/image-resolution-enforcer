@@ -16,21 +16,21 @@ def process_submissions(reddit):
     for submission in subreddit.new(limit=25):
         timestamp = datetime.utcfromtimestamp(int(submission.created_utc))
         if submission.link_flair_text in ('Question','Meta','Success Story!'):
-            print(f"{timestamp} {submission.link_flair_text} {submission.author}")
+            print(f"{timestamp} {resolution}DPI {submission.author} {submission.link_flair_text}")
             continue   
         if submission.is_self:  
             width = get_width(submission)
             if width == 0:
-                print(f"{timestamp} INVALID {submission.author} {submission.link_flair_text}")
+                print(f"{timestamp} INVALID {resolution}DPI {submission.author} {submission.link_flair_text}")
                 continue
             resolution = round(width/8.5) # convert to DPI
             if width < MIN_WIDTH:
                 print(f"{timestamp} REJECT {resolution}DPI {submission.author} {submission.link_flair_text}")
-                # reddit.redditor("").message(subject="blurry image alert", message=f"{submission.permalink} {submission.link_flair_text} {resolution}DPI")
-                # submission.report(f"low-res image detected: {resolution}DPI")
+                reddit.redditor(USERNAME).message(subject=f"blurry image alert: resolution: {resolution}DPI", message=f"{submission.permalink} flair: {submission.link_flair_text} by /u/{submission.author}")
+                submission.report(f"low-res image detected: {resolution}DPI")
                 return
             else:
-                print(f"{timestamp} PASS {submission.link_flair_text} {submission.author}")
+                print(f"{timestamp} PASS {resolution}DPI {submission.author} {submission.link_flair_text}")
                 return
 
 
