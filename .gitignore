@@ -1,3 +1,4 @@
 .gitattributes
 secrets.py
+.env
 .DS_Store

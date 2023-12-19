@@ -1,13 +1,18 @@
 #!/usr/bin/python3
 
 import praw
-from datetime import datetime
+import os
 
-USERNAME = ""
-PASSWORD = ""
-CLIENT_ID = ""
-CLIENT_SECRET = ""
-USER_AGENT = "script:ImageResolutionEnforcer:v0.0.1 (by /u/)"
+from datetime import datetime
+from dotenv import load_dotenv
+
+load_dotenv()
+
+USERNAME = os.getenv("USERNAME")
+PASSWORD = os.getenv("PASSWORD")
+CLIENT_ID = os.getenv("CLIENT_ID")
+CLIENT_SECRET = os.getenv("CLIENT_SECRET")
+USER_AGENT = f"script:ImageResolutionEnforcer:v0.0.1 (by /u/{USERNAME})"
 
 MIN_WIDTH = 5100 # width in pixels. equivalent to 600DPI for a standard letter size paper
 
@@ -35,8 +40,8 @@ def process_submissions(reddit):
 
 
 def get_width(submission):
-    s = submission.selftext
-    keyword = 'width=' # keyword found in image URL: '...width=5100...'
+    s = submission.selftext # PNG width is embedded into image URL '...width=5100...'
+    keyword = 'width='
     try:
         start = s.index(keyword)
     except ValueError: # keyword not found
@@ -47,6 +52,7 @@ def get_width(submission):
         return int(s[start:(end-1)])
     else:
         return int(s[start:end])
+
 
 if __name__ == "__main__":
     process_submissions(praw.Reddit(
