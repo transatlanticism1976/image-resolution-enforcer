@@ -10,7 +10,7 @@ USERNAME = os.getenv("USERNAME")
 PASSWORD = os.getenv("PASSWORD")
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-USER_AGENT = f"script:ImageResolutionEnforcer:v0.0.1 (by /u/{USERNAME})"
+USER_AGENT = "script:ImageResolutionEnforcer:v0.0.1 (by /u/transatlanticism1976)"
 MIN_WIDTH = 5100  # image width in pixels. equivalent to 600DPI for a standard letter size paper
 
 counter = 0
