@@ -14,7 +14,7 @@ def process_submissions(reddit):
     subreddit = reddit.subreddit('EngineeringResumes')
     for submission in subreddit.new(limit=10):
         if submission.link_flair_text in ('Question','Meta','Success Story!'):
-            return
+            continue # skip submission 
         if submission.is_self:
             width = get_width(submission)
             resolution = round(width/8.5) # convert to DPI
