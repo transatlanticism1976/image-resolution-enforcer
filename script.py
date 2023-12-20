@@ -37,7 +37,7 @@ def process_submissions(reddit):
     for submission in subreddit.new(limit=25):
         global counter
         counter += 1
-        timestamp = datetime.utcfromtimestamp(int(submission.created_utc))
+        timestamp = datetime.fromtimestamp(int(submission.created_utc))
         if submission.link_flair_text in ("Question", "Meta", "Success Story!"):
             print(
                 f"{timestamp} {resolution}DPI {submission.author} {submission.link_flair_text}"
