@@ -42,7 +42,7 @@ def process_submissions(reddit):
                 f"{timestamp} IGNORE {submission.author} {submission.link_flair_text}"
             )
             continue
-        if submission.is_self:
+        elif submission.is_self:
             width = get_image_width(submission)
             if width == 0:
                 print(
@@ -59,12 +59,12 @@ def process_submissions(reddit):
                     message=f"{submission.permalink} flair: {submission.link_flair_text} by /u/{submission.author}",
                 )
                 submission.report(f"low-res image detected: {resolution}DPI")
-                return
+                continue
             else:
                 print(
                     f"{timestamp} PASS {resolution}DPI {submission.author} {submission.link_flair_text}"
                 )
-                return
+                continue
 
 
 def get_image_width(submission):
