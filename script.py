@@ -10,9 +10,8 @@ USERNAME = os.getenv("USERNAME")
 PASSWORD = os.getenv("PASSWORD")
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-USER_AGENT = "script:ImageResolutionEnforcer:v0.0.1 (by /u/transatlanticism1976)"
+USER_AGENT = "script:ImageResolutionEnforcer:v0.0.1 (by /u/" + USERNAME + ")"
 MIN_WIDTH = 5100  # image width in pixels. equivalent to 600DPI for a standard letter size paper
-
 counter = 0
 
 
@@ -40,7 +39,7 @@ def process_submissions(reddit):
         timestamp = datetime.fromtimestamp(int(submission.created_utc))
         if submission.link_flair_text in ("Question", "Meta", "Success Story!"):
             print(
-                f"{timestamp} {resolution}DPI {submission.author} {submission.link_flair_text}"
+                f"{timestamp} IGNORE {submission.author} {submission.link_flair_text}"
             )
             continue
         if submission.is_self:
