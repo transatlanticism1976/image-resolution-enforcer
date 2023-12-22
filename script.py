@@ -6,7 +6,9 @@ import os
 from datetime import datetime
 from dotenv import load_dotenv
 
-MIN_IMAGE_WIDTH = 5100  # image width in pixels, equivalent to 600DPI for a standard letter size paper
+# image width in pixels equivalent to 600DPI for standard letter paper size
+MIN_IMAGE_WIDTH = 5100
+
 LIMIT = 10
 
 num_reports = 0
@@ -35,57 +37,58 @@ def instantiate_reddit():
 
 def process_submissions(reddit):
     subreddit = reddit.subreddit("EngineeringResumes")
+
     for submission in subreddit.new(limit=LIMIT):
         global num_reports
         timestamp = datetime.fromtimestamp(int(submission.created_utc))
+
         if submission.link_flair_text in ("Meta", "Success Story!"):
             print(
                 f"{timestamp} IGNORE {submission.author} {submission.link_flair_text}"
             )
-            num_reports += 1
 
         elif submission.link_flair_text == ("Question"):
             if any(x in submission.selftext for x in ["jpg", "jpeg", "png", "imgur"]):
+                num_reports += 1
+                submission.report(
+                    f"potential incorrect usage of 'Question' flair. change to more appropriate flair if necessary"
+                )
                 print(
-                    f"{timestamp} QUESTION w/ IMAGE {submission.author} {submission.title}"
+                    f"{timestamp} QUESTION w/ IMAGE -> REPORT {submission.author} {submission.title}"
                 )
-                submission.report(
-                    f"potential incorrect usage of 'Question' flair. change to more appropriate flair if necessary"
-                )
-                num_reports += 1
             elif submission.selftext == "": # no body text
-                print(f"{timestamp} QUESTION w/o BODY TEXT {submission.author} {submission.title}")
+                num_reports += 1
                 submission.report(
                     f"potential incorrect usage of 'Question' flair. change to more appropriate flair if necessary"
                 )
-                num_reports += 1
+                print(f"{timestamp} QUESTION w/o BODY TEXT-> REPORT {submission.author} {submission.title}")
             else:
-                print(f"{timestamp} QUESTION PASS {submission.author}")
+                print(f"{timestamp} QUESTION -> PASS {submission.author}")
 
         else:
             image_width = get_image_width(submission)
-            resolution = round(image_width / 8.5)  # convert pixels to DPI
+            dots_per_inch = round(image_width / 8.5)
             if image_width == 0:
+                num_reports += 1
+                submission.report(f"POST IS MISSING IMAGE")
                 print(
                     f"{timestamp} 'width=' not found in selftext {submission.author} {submission.link_flair_text}"
                 )
-                submission.report(f"POST IS MISSING IMAGE")
-                num_reports += 1
             elif image_width < MIN_IMAGE_WIDTH:
-                print(
-                    f"{timestamp} REJECT {resolution}DPI {submission.author} {submission.link_flair_text}"
-                )
                 num_reports += 1
-                submission.report(f"LOW QUALITY IMAGE DETECTED: {resolution}DPI")
+                submission.report(f"LOW QUALITY IMAGE DETECTED: {dots_per_inch}DPI")
+                print(
+                    f"{timestamp} {dots_per_inch}DPI -> REJECT {submission.author} {submission.link_flair_text}"
+                )
             else:
                 print(
-                    f"{timestamp} PASS {resolution}DPI {submission.author} {submission.link_flair_text}"
+                    f"{timestamp} {dots_per_inch}DPI -> PASS  {submission.author} {submission.link_flair_text}"
                 )
 
 
 def get_image_width(submission) -> int:
     s = submission.selftext  # image width is embedded into image URL '...width=5100...'
-    if s == "":
+    if s == "": # user did not follow submission instructions
         return 0
     keyword = "width="
     try:
