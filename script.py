@@ -99,7 +99,7 @@ def process_submissions(reddit):
 
 
 def get_image_width(submission):
-    s = submission.selftext  # PNG width is embedded into image URL '...width=5100...'
+    s = submission.selftext  # image width is embedded into image URL '...width=5100...'
     keyword = "width="
     try:
         start = s.index(keyword)
