@@ -2,47 +2,82 @@
 
 import praw
 import os
+import time
 from datetime import datetime
 from dotenv import load_dotenv
 
-load_dotenv()
-USERNAME = os.getenv("USERNAME")
-PASSWORD = os.getenv("PASSWORD")
-CLIENT_ID = os.getenv("CLIENT_ID")
-CLIENT_SECRET = os.getenv("CLIENT_SECRET")
-USER_AGENT = "script:ImageResolutionEnforcer:v0.0.1 (by /u/" + USERNAME + ")"
-MIN_WIDTH = 5100  # image width in pixels. equivalent to 600DPI for a standard letter size paper
+MIN_WIDTH = 5100  # image width in pixels, equivalent to 600DPI for a standard letter size paper
+LIMIT = 50
 counter = 0
 
 
 def main():
-    print("authenticating..")
-    reddit = praw.Reddit(
-        username=USERNAME,
-        password=PASSWORD,
-        client_id=CLIENT_ID,
-        client_secret=CLIENT_SECRET,
-        user_agent=USER_AGENT,
-    )
-    print("authenticated as {}".format(reddit.user.me()))
+    start_time = time.time()
+
+    reddit = instantiate_reddit()
+
     process_submissions(reddit)
+
     print("completed processing submissions")
     print(f"total number of submissions processed: {counter}")
+    print("program took", time.time() - start_time, "seconds to run")
+
+
+def instantiate_reddit():
+    load_dotenv()
+    username = os.getenv("USERNAME")
+    password = os.getenv("PASSWORD")
+    client_id = os.getenv("CLIENT_ID")
+    client_secret = os.getenv("CLIENT_SECRET")
+    user_agent = "script:ImageResolutionEnforcer:v0.0.1 (by /u/" + username + ")"
+
+    print("authenticating..")
+    reddit = praw.Reddit(
+        username=username,
+        password=password,
+        client_id=client_id,
+        client_secret=client_secret,
+        user_agent=user_agent,
+        ratelimit_seconds=600
+    )
+
+    print("authenticated as {}".format(reddit.user.me()))
+    return(reddit)
 
 
 def process_submissions(reddit):
     print("processing submissions...")
     subreddit = reddit.subreddit("EngineeringResumes")
-    for submission in subreddit.new(limit=25):
+    for submission in subreddit.new(limit=LIMIT):
         global counter
         counter += 1
         timestamp = datetime.fromtimestamp(int(submission.created_utc))
-        if submission.link_flair_text in ("Question", "Meta", "Success Story!"):
+        if submission.link_flair_text in ("Meta", "Success Story!"):
             print(
                 f"{timestamp} IGNORE {submission.author} {submission.link_flair_text}"
             )
             continue
-        elif submission.is_self:
+
+        elif submission.link_flair_text == ("Question"):
+            if any(x in submission.selftext for x in ["jpg", "jpeg", "png", "imgur"]):
+                print(
+                    f"{timestamp} QUESTION: IMAGE DETECTED {submission.author}"
+                )
+                submission.report(
+                    f"potential incorrect usage of 'Question' flair. change to more appropriate flair if necessary"
+                )
+                continue
+            elif submission.selftext == "": # no body text
+                print(f"{timestamp} QUESTION: NO BODY TEXT {submission.author}")
+                submission.report(
+                    f"potential incorrect usage of 'Question' flair. change to more appropriate flair if necessary"
+                )
+                continue
+            else:
+                print(f"{timestamp} QUESTION: NO BODY TEXT {submission.author}")
+                continue
+
+        else:
             width = get_image_width(submission)
             if width == 0:
                 print(
@@ -54,11 +89,7 @@ def process_submissions(reddit):
                 print(
                     f"{timestamp} FAIL {resolution}DPI {submission.author} {submission.link_flair_text}"
                 )
-                reddit.redditor(USERNAME).message(
-                    subject=f"blurry image alert: resolution: {resolution}DPI",
-                    message=f"{submission.permalink} flair: {submission.link_flair_text} by /u/{submission.author}",
-                )
-                submission.report(f"low-res image detected: {resolution}DPI")
+                submission.report(f"LOW QUALITY IMAGE DETECTED: {resolution}DPI")
                 continue
             else:
                 print(
