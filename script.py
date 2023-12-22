@@ -56,7 +56,6 @@ def process_submissions(reddit):
             print(
                 f"{timestamp} IGNORE {submission.author} {submission.link_flair_text}"
             )
-            continue
 
         elif submission.link_flair_text == ("Question"):
             if any(x in submission.selftext for x in ["jpg", "jpeg", "png", "imgur"]):
@@ -66,16 +65,13 @@ def process_submissions(reddit):
                 submission.report(
                     f"potential incorrect usage of 'Question' flair. change to more appropriate flair if necessary"
                 )
-                continue
             elif submission.selftext == "": # no body text
                 print(f"{timestamp} QUESTION: NO BODY TEXT {submission.author}")
                 submission.report(
                     f"potential incorrect usage of 'Question' flair. change to more appropriate flair if necessary"
                 )
-                continue
             else:
                 print(f"{timestamp} QUESTION: NO BODY TEXT {submission.author}")
-                continue
 
         else:
             width = get_image_width(submission)
@@ -83,19 +79,16 @@ def process_submissions(reddit):
                 print(
                     f"{timestamp} INVALID {submission.author} {submission.link_flair_text}"
                 )
-                continue
             resolution = round(width / 8.5)  # convert pixels to DPI
             if width < MIN_WIDTH:
                 print(
                     f"{timestamp} FAIL {resolution}DPI {submission.author} {submission.link_flair_text}"
                 )
                 submission.report(f"LOW QUALITY IMAGE DETECTED: {resolution}DPI")
-                continue
             else:
                 print(
                     f"{timestamp} PASS {resolution}DPI {submission.author} {submission.link_flair_text}"
                 )
-                continue
 
 
 def get_image_width(submission):
