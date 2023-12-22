@@ -70,9 +70,9 @@ def process_submissions(reddit):
             dots_per_inch = round(image_width / 8.5)
             if image_width == 0:
                 num_reports += 1
-                submission.report(f"POST IS MISSING IMAGE")
+                submission.report(f"IMAGE MISSING")
                 print(
-                    f"{timestamp} 'width=' not found in selftext {submission.author} {submission.link_flair_text}"
+                    f"{timestamp} IMAGE MISSING {submission.author} {submission.link_flair_text}"
                 )
             elif image_width < MIN_IMAGE_WIDTH:
                 num_reports += 1
