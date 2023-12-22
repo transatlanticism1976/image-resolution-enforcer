@@ -9,24 +9,20 @@ from dotenv import load_dotenv
 # image width in pixels equivalent to 600DPI for standard letter paper size
 MIN_IMAGE_WIDTH = 5100
 
-LIMIT = 10
+LIMIT = 50
 
 num_reports = 0
 
 
 def instantiate_reddit():
     load_dotenv()
-    username = os.getenv("USERNAME")
-    password = os.getenv("PASSWORD")
-    client_id = os.getenv("CLIENT_ID")
-    client_secret = os.getenv("CLIENT_SECRET")
-    user_agent = "script:ImageResolutionEnforcer:v0.0.1 (by /u/" + username + ")"
+    user_agent = "script:ImageResolutionEnforcer:v0.0.1 (by /u/" + os.getenv("USERNAME") + ")"
 
     reddit = praw.Reddit(
-        username=username,
-        password=password,
-        client_id=client_id,
-        client_secret=client_secret,
+        username=os.getenv("USERNAME"),
+        password=os.getenv("PASSWORD"),
+        client_id=os.getenv("CLIENT_ID"),
+        client_secret=os.getenv("CLIENT_SECRET"),
         user_agent=user_agent,
         ratelimit_seconds=600
     )
@@ -68,7 +64,7 @@ def process_submissions(reddit):
         else:
             image_width = get_image_width(submission)
             dots_per_inch = round(image_width / 8.5)
-            if image_width == 0:
+            if image_width == -1:
                 num_reports += 1
                 submission.report(f"IMAGE MISSING")
                 print(
@@ -87,13 +83,12 @@ def process_submissions(reddit):
 
 
 def get_image_width(submission) -> int:
-    s = submission.selftext  # image width is embedded into image URL '...width=5100...'
+    s = submission.selftext
     keyword1 = "width="
     keyword2 = "&"
 
     if s == "" or s.find(keyword1) == -1:
-        return 0 
-
+        return -1
     else:
         width = s.split(keyword1)[1].split(keyword2)[0]
         return(int(width))
