@@ -16,14 +16,12 @@ num_reports = 0
 
 def instantiate_reddit():
     load_dotenv()
-    user_agent = "script:ImageResolutionEnforcer:v0.0.1 (by /u/" + os.getenv("USERNAME") + ")"
-
     reddit = praw.Reddit(
         username=os.getenv("USERNAME"),
         password=os.getenv("PASSWORD"),
         client_id=os.getenv("CLIENT_ID"),
         client_secret=os.getenv("CLIENT_SECRET"),
-        user_agent=user_agent,
+        user_agent="script:ImageResolutionEnforcer:v0.0.1 (by /u/{})".format(os.getenv("USERNAME")),
         ratelimit_seconds=600
     )
 
@@ -33,9 +31,9 @@ def instantiate_reddit():
 
 def process_submissions(reddit):
     subreddit = reddit.subreddit("EngineeringResumes")
+    global num_reports
 
     for submission in subreddit.new(limit=LIMIT):
-        global num_reports
         timestamp = datetime.fromtimestamp(int(submission.created_utc))
 
         if submission.link_flair_text in ("Meta", "Success Story!"):
@@ -52,7 +50,7 @@ def process_submissions(reddit):
                 print(
                     f"{timestamp} QUESTION w/ IMAGE -> REPORT {submission.author} {submission.title}"
                 )
-            elif submission.selftext == "": # no body text
+            elif submission.selftext == "":
                 num_reports += 1
                 submission.report(
                     f"potential incorrect usage of 'Question' flair. change to more appropriate flair if necessary"
