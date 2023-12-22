@@ -88,19 +88,15 @@ def process_submissions(reddit):
 
 def get_image_width(submission) -> int:
     s = submission.selftext  # image width is embedded into image URL '...width=5100...'
-    if s == "": # user did not follow submission instructions
-        return 0
-    keyword = "width="
-    try:
-        start = s.index(keyword)
-    except ValueError:  # user did not follow submission instructions
-        return 0
-    start = start + len(keyword)
-    end = start + 4  # extract 4 digits
-    if s[end - 1] == "&":  # if width is only 3 digits
-        return int(s[start : (end - 1)])
+    keyword1 = "width="
+    keyword2 = "&"
+
+    if s == "" or s.find(keyword1) == -1:
+        return 0 
+
     else:
-        return int(s[start:end])
+        width = s.split(keyword1)[1].split(keyword2)[0]
+        return(int(width))
 
 
 def main():
