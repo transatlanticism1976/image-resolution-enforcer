@@ -11,8 +11,6 @@ MIN_IMAGE_WIDTH = 5100
 
 LIMIT = 50
 
-num_reports = 0
-
 
 def instantiate_reddit():
     load_dotenv()
@@ -29,9 +27,9 @@ def instantiate_reddit():
     return(reddit)
 
 
-def process_submissions(reddit):
+def process_submissions(reddit) -> int:
     subreddit = reddit.subreddit("EngineeringResumes")
-    global num_reports
+    num_reports = 0
 
     for submission in subreddit.new(limit=LIMIT):
         timestamp = datetime.fromtimestamp(int(submission.created_utc))
@@ -78,6 +76,7 @@ def process_submissions(reddit):
                 print(
                     f"{timestamp} {dots_per_inch}DPI -> PASS  {submission.author} {submission.link_flair_text}"
                 )
+    return num_reports
 
 
 def get_image_width(submission) -> int:
@@ -94,7 +93,7 @@ def get_image_width(submission) -> int:
 
 def main():
     reddit = instantiate_reddit()
-    process_submissions(reddit)
+    num_reports = process_submissions(reddit)
     print(f"number of submissions reported: {num_reports}")
 
 
